@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>お問い合わせフォーム（GitHub Pages × GAS）</title>
+
+  <script>
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycby5avmUQRQVKvr0e0nLsd6uuo1Xr6kycdqltfkJ0yHOfLxVdOB1ef2qM0a5vHLidzI0/exec";
+  </script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;600&display=swap" rel="stylesheet" />
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Noto Sans JP',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.7;color:#222;background:#f5f7fb}
+    .wrap{max-width:760px;margin:40px auto;padding:0 20px}
+    .card{background:#fff;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.08)}
+    .progress{padding:22px;border-radius:16px;margin-bottom:20px}
+    .bar{height:8px;background:#e7e9ee;border-radius:4px;overflow:hidden}
+    .fill{height:100%;width:20%;background:linear-gradient(90deg,#FFD54F,#FF9800)}
+    .ptext{text-align:center;margin-top:10px;font-size:13px;color:#666}
+    .steps{padding:28px 28px 8px}
+    .step{display:none}
+    .step.active{display:block;animation:fade .25s ease}
+    @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .h{font-size:22px;font-weight:700;margin-bottom:18px;text-align:center}
+    .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+    .opt{display:block;border:2px solid #e7e9ee;border-radius:12px;padding:16px;cursor:pointer;transition:.2s}
+    .opt:hover{border-color:#FFC107;box-shadow:0 4px 14px rgba(255,193,7,.15)}
+    .opt input{position:absolute;opacity:0}
+    .opt span{display:block;text-align:center;font-weight:500}
+    .group{margin-bottom:18px}
+    .group label{display:block;font-weight:600;font-size:14px;margin-bottom:8px}
+    .req{display:inline-block;margin-left:6px;font-size:11px;background:#ff5252;color:#fff;border-radius:4px;padding:2px 6px}
+    .optl{display:inline-block;margin-left:6px;font-size:11px;background:#e7e9ee;color:#555;border-radius:4px;padding:2px 6px}
+    input[type="text"],input[type="email"],input[type="tel"],select,textarea{width:100%;padding:12px 14px;border:2px solid #e7e9ee;border-radius:10px;font-size:16px;transition:.2s;background:#fff}
+    input:focus,select:focus,textarea:focus{outline:none;border-color:#FFC107;box-shadow:0 0 0 4px rgba(255,193,7,.12)}
+    .hint{font-size:12px;color:#666;margin-top:6px;display:block}
+    .err{border-color:#ff5252!important;box-shadow:0 0 0 4px rgba(255,82,82,.08)!important}
+    .btns{display:flex;gap:12px;justify-content:space-between;padding:16px 28px 28px}
+    .btn{appearance:none;border:none;border-radius:26px;padding:12px 22px;font-weight:700;cursor:pointer;transition:.15s}
+    .b-back{background:#f3f5f8;color:#333}
+    .b-back:hover{background:#e8ebf1}
+    .b-next,.b-submit{background:linear-gradient(45deg,#2563eb,#3b82f6);color:#fff;box-shadow:0 6px 18px rgba(37,99,235,.28)}
+    .b-next:hover,.b-submit:hover{transform:translateY(-1px)}
+    .note{margin:8px 0 0;font-size:13px;color:#666}
+    .ok{padding:14px 16px;background:#ecfdf5;border:1px solid #10b98133;border-radius:10px;color:#065f46;margin-top:12px}
+    .ng{padding:14px 16px;background:#fef2f2;border:1px solid #ef444433;border-radius:10px;color:#7f1d1d;margin-top:12px}
+    footer{margin-top:18px;text-align:center;font-size:12px;color:#777}
+    @media (max-width:768px){.btns{flex-direction:column}.btn{width:100%}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1 style="text-align:center;margin-bottom:14px;">お問い合わせ</h1>
+
+    <div class="card progress" aria-live="polite">
+      <div class="bar"><div class="fill" id="fill"></div></div>
+      <p class="ptext"><span id="cs">1</span> / <span id="ts">5</span></p>
+    </div>
+
+    <form id="f" class="card" method="POST" action="">
+      <div class="steps">
+        <section class="step active" id="s1">
+          <h2 class="h">あなたの現在の状況を教えてください</h2>
+          <div class="grid">
+            <label class="opt"><input type="radio" name="currentStatus" value="現職" required><span>現職</span></label>
+            <label class="opt"><input type="radio" name="currentStatus" value="離職"><span>離職</span></label>
+            <label class="opt"><input type="radio" name="currentStatus" value="休職"><span>休職</span></label>
+            <label class="opt"><input type="radio" name="currentStatus" value="就労移行に通所中"><span>就労移行に通所中</span></label>
+            <label class="opt"><input type="radio" name="currentStatus" value="就業経験なし"><span>就業経験なし</span></label>
+          </div>
+        </section>
+
+        <section class="step" id="s2">
+          <h2 class="h">就職の希望時期について</h2>
+          <div class="grid">
+            <label class="opt"><input type="radio" name="jobTiming" value="1ヶ月以内" required><span>1ヶ月以内</span></label>
+            <label class="opt"><input type="radio" name="jobTiming" value="3ヶ月以内"><span>3ヶ月以内</span></label>
+            <label class="opt"><input type="radio" name="jobTiming" value="半年以内"><span>半年以内</span></label>
+            <label class="opt"><input type="radio" name="jobTiming" value="いいところがあれば"><span>いいところがあれば</span></label>
+          </div>
+        </section>
+
+        <section class="step" id="s3">
+          <h2 class="h">手帳の種類を教えてください</h2>
+          <div class="grid">
+            <label class="opt"><input type="radio" name="disabilityType" value="身体障害" required><span>身体障害</span></label>
+            <label class="opt"><input type="radio" name="disabilityType" value="精神障害"><span>精神障害</span></label>
+            <label class="opt"><input type="radio" name="disabilityType" value="知的障害"><span>知的障害</span></label>
+            <label class="opt"><input type="radio" name="disabilityType" value="発達障害"><span>発達障害</span></label>
+            <label class="opt"><input type="radio" name="disabilityType" value="手帳申請中"><span>手帳申請中</span></label>
+          </div>
+        </section>
+
+        <section class="step" id="s4">
+          <h2 class="h">あなたの情報について</h2>
+          <div class="group">
+            <label for="name">お名前<span class="req">必須</span></label>
+            <input id="name" name="name" type="text" required autocomplete="name" />
+          </div>
+          <div class="group">
+            <label for="phone">電話番号<span class="req">必須</span></label>
+            <input id="phone" name="phone" type="tel" required inputmode="tel" autocomplete="tel" />
+          </div>
+          <div class="group">
+            <label for="email">メールアドレス<span class="req">必須</span></label>
+            <input id="email" name="email" type="email" required autocomplete="email" />
+          </div>
+          <div class="group">
+            <label for="region">お住いの地域<span class="req">必須</span></label>
+            <select id="region" name="region" required>
+              <option value="">選択してください</option>
+              <option>北海道</option><option>青森県</option><option>岩手県</option><option>宮城県</option><option>秋田県</option><option>山形県</option><option>福島県</option>
+              <option>茨城県</option><option>栃木県</option><option>群馬県</option><option>埼玉県</option><option>千葉県</option><option>東京都</option><option>神奈川県</option>
+              <option>新潟県</option><option>富山県</option><option>石川県</option><option>福井県</option><option>山梨県</option><option>長野県</option>
+              <option>岐阜県</option><option>静岡県</option><option>愛知県</option><option>三重県</option>
+              <option>滋賀県</option><option>京都府</option><option>大阪府</option><option>兵庫県</option><option>奈良県</option><option>和歌山県</option>
+              <option>鳥取県</option><option>島根県</option><option>岡山県</option><option>広島県</option><option>山口県</option>
+              <option>徳島県</option><option>香川県</option><option>愛媛県</option><option>高知県</option>
+              <option>福岡県</option><option>佐賀県</option><option>長崎県</option><option>熊本県</option><option>大分県</option><option>宮崎県</option><option>鹿児島県</option><option>沖縄県</option>
+            </select>
+          </div>
+          <span class="hint"><label><input type="checkbox" name="hearingImpaired"> 聴覚・発話への配慮が必要</label></span>
+          <input type="text" name="hp_token" id="hp" style="display:none" tabindex="-1" autocomplete="off" />
+          <input type="hidden" name="ts" id="ts" value="">
+        </section>
+
+        <section class="step" id="s5">
+          <h2 class="h">その他質問事項・気になること</h2>
+          <div class="group">
+            <label for="qs">その他質問事項<span class="optl">任意</span></label>
+            <textarea id="qs" name="questions" rows="5" placeholder="例：在宅勤務の可否、必要な配慮の相談 など"></textarea>
+          </div>
+          <p class="note">送信後、このページ内に完了メッセージを表示します。</p>
+          <div id="result" style="display:none"></div>
+        </section>
+
+        <section class="step" id="done" aria-live="polite">
+          <h2 class="h">お申し込みありがとうございました</h2>
+          <div class="ok" id="doneMsg">
+            担当者より折り返しご連絡いたします。<br>
+            メールが届かない場合は迷惑メールフォルダをご確認ください。
+          </div>
+        </section>
+      </div>
+
+      <div class="btns" id="btns">
+        <button type="button" class="btn b-back" id="back">戻る</button>
+        <button type="button" class="btn b-next" id="next">次へ</button>
+        <button type="submit" class="btn b-submit" id="submit" style="display:none">送信する</button>
+      </div>
+    </form>
+
+    <footer>© Your Company</footer>
+  </div>
+
+  <script>
+  (function(){
+    const tsField = document.getElementById('ts');
+    tsField.value = Date.now();
+
+    const st = { step:1, total:5, sending:false };
+    const $  = s => document.querySelector(s);
+    const $$ = s => document.querySelectorAll(s);
+    const form = document.getElementById("f");
+    const btns = document.getElementById("btns");
+
+    function show(n){
+      $$(".step").forEach(e=>e.classList.remove("active"));
+      (n<=st.total ? document.getElementById("s"+n) : document.getElementById("done")).classList.add("active");
+      st.step = Math.min(n, st.total);
+      document.getElementById("fill").style.width = (st.step / st.total * 100) + "%";
+      document.getElementById("cs").textContent = st.step;
+      document.getElementById("ts").textContent = st.total;
+
+      if(n<=st.total){
+        document.getElementById("next").style.display = (st.step < st.total) ? "block" : "none";
+        document.getElementById("submit").style.display = (st.step === st.total) ? "block" : "none";
+        document.getElementById("back").disabled = (st.step === 1);
+        btns.style.display = "flex";
+      }else{
+        btns.style.display = "none";
+      }
+    }
+
+    function valid(){
+      let ok = true;
+      $$(".err").forEach(el=>el.classList.remove("err"));
+
+      if([1,2,3].includes(st.step)){
+        const name = st.step===1 ? "currentStatus" : st.step===2 ? "jobTiming" : "disabilityType";
+        const has = Array.from($$('input[name="'+name+'"]')).some(r=>r.checked);
+        if(!has) ok = false;
+      }
+      if(st.step===4){
+        const req = ["#name","#phone","#email","#region"];
+        req.forEach(sel=>{
+          const el = document.querySelector(sel);
+          if(!el.value.trim()){ el.classList.add("err"); ok = false; }
+        });
+        const email = document.getElementById("email").value.trim();
+        if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ document.getElementById("email").classList.add("err"); ok = false; }
+        const phone = document.getElementById("phone").value.replace(/[^0-9]/g,"");
+        if(phone.length < 10){ document.getElementById("phone").classList.add("err"); ok = false; }
+      }
+      return ok;
+    }
+
+    document.getElementById("next").addEventListener("click", ()=>{ if(valid()) show(st.step+1); });
+    document.getElementById("back").addEventListener("click", ()=> show(st.step-1) );
+    ["currentStatus","jobTiming","disabilityType"].forEach(name=>{
+      $$('input[name="'+name+'"]').forEach(r=>{
+        r.addEventListener("change", ()=>{ if(st.step <= 3) show(st.step+1); });
+      });
+    });
+
+    async function postMultiRoute(){
+      if(st.sending) return;
+      if(!valid()) return;
+      const hp = document.getElementById("hp"); if(hp && hp.value){ finish(true); return; }
+
+      st.sending = true;
+      const submitBtn = document.getElementById("submit");
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "送信中…"; }
+
+      const fd = new FormData(form);
+      const urlEnc = new URLSearchParams(); for (const [k,v] of fd.entries()) urlEnc.append(k,v);
+
+      try{
+        if (navigator.sendBeacon) {
+          const blob = new Blob([urlEnc.toString()], {type:"application/x-www-form-urlencoded;charset=UTF-8"});
+          const ok = navigator.sendBeacon(GAS_WEB_APP_URL, blob);
+          if (ok) { finish(true); return; }
+        }
+      }catch(e){}
+
+      try{
+        await fetch(GAS_WEB_APP_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+          body: urlEnc.toString()
+        });
+        finish(true); return;
+      }catch(e){}
+
+      try{
+        const wname = "gas_post_" + Date.now();
+        const win = window.open("about:blank", wname);
+        const tempForm = document.createElement("form");
+        tempForm.method = "POST"; tempForm.action = GAS_WEB_APP_URL; tempForm.target = wname; tempForm.style.display="none";
+        for (const [k,v] of fd.entries()){
+          const input = document.createElement("input");
+          input.type="hidden"; input.name=k; input.value=v;
+          tempForm.appendChild(input);
+        }
+        document.body.appendChild(tempForm);
+        tempForm.submit();
+        setTimeout(()=>{ try{ document.body.removeChild(tempForm); }catch(_){} }, 1000);
+        finish(true); return;
+      }catch(e){
+        console.error("All routes failed:", e);
+        finish(false);
+      }
+
+      function finish(success){
+        show(st.total + 1);
+        const result = document.getElementById("result");
+        if (result) {
+          result.style.display = "block";
+          result.className = success ? "ok" : "ng";
+          result.textContent = success ? "送信を受け付けました。" : "送信に失敗しました。しばらくしてから再度お試しください。";
+        }
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = success ? "送信完了" : "送信失敗"; }
+        try { form.reset(); } catch(_){}
+        tsField.value = Date.now();
+        st.sending = false;
+      }
+    }
+
+    document.getElementById("submit").addEventListener("click", (e)=>{ e.preventDefault(); postMultiRoute(); });
+    form.addEventListener("submit", (e)=>{ e.preventDefault(); postMultiRoute(); });
+
+    show(1);
+  })();
+  </script>
+</body>
+</html>
